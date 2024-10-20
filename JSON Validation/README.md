@@ -1,6 +1,7 @@
 ## JSON Validation
 
 This folder contains three files:
+
     - stock-schema.json
     - stock.json
     - validator.py
