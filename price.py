@@ -1,5 +1,69 @@
 import yfinance as yf
 from datetime import datetime, timedelta
+import json
+import pandas as pd
+
+def fetch_portfolio_sharpe_ratio(portfolio, risk_free_rate=0.03):
+    """
+    Fetches the Sharpe Ratio for the entire portfolio based on historical prices.
+
+    Parameters:
+        portfolio: The portfolio data loaded from JSON.
+        risk_free_rate (float): The risk-free rate for calculating the Sharpe Ratio (default is 3% annually).
+
+    Returns:
+        float: The Sharpe Ratio for the entire portfolio.
+    """
+    try:
+        # Get today's date and one year ago's date
+        end_date = datetime.today().strftime('%Y-%m-%d')
+        start_date = (datetime.today() - timedelta(days=365)).strftime('%Y-%m-%d')
+
+        # Create an empty DataFrame to hold daily portfolio returns
+        portfolio_daily_returns = pd.DataFrame()
+
+        total_investment = sum(stock['amount_in_dollars'] for stock in portfolio['stocks'])
+
+        # Loop through each stock in the portfolio
+        for stock in portfolio['stocks']:
+            ticker = stock['ticker']
+            investment_amount = stock['amount_in_dollars']
+            weight = investment_amount / total_investment  # Weight of the stock in the portfolio
+
+            # Use yfinance to get the historical prices for the past year
+            stock_data = yf.Ticker(ticker)
+            price_data = stock_data.history(start=start_date, end=end_date, interval="1d")
+
+            # Check if data is available
+            if not price_data.empty:
+                # Get the closing prices and calculate daily returns
+                closing_prices = price_data['Close']
+                daily_returns = closing_prices.pct_change().dropna()
+
+                # Add the weighted daily returns of the stock to the portfolio's daily returns
+                portfolio_daily_returns[ticker] = daily_returns * weight
+            else:
+                print(f"No historical data available for {ticker}")
+                return None
+
+        # Sum the weighted returns to get the total portfolio daily returns
+        portfolio_daily_returns['Portfolio'] = portfolio_daily_returns.sum(axis=1)
+
+        # Calculate the average daily return and standard deviation of portfolio returns
+        average_daily_return = portfolio_daily_returns['Portfolio'].mean()
+        stddev_daily_return = portfolio_daily_returns['Portfolio'].std()
+
+        # Assuming a risk-free rate of 3% per year (converted to daily rate)
+        daily_risk_free_rate = risk_free_rate / 252  # 252 trading days in a year
+
+        # Calculate the Sharpe Ratio for the portfolio
+        sharpe_ratio = (average_daily_return - daily_risk_free_rate) / stddev_daily_return
+
+        return sharpe_ratio
+
+    except Exception as e:
+        print(f"Error fetching historical prices for portfolio: {e}")
+        return None
 
 
 def get_historical_stock_price(ticker, purchase_date):
@@ -57,7 +121,7 @@ def calculate_investment_value(ticker, purchase_date, investment_amount):
     initial_price = get_historical_stock_price(ticker, purchase_date)
 
     if initial_price == None:
-        return "No data available for the specified purchase date."
+        return "Invalid date or ticker"
 
     current_price = get_current_stock_price(ticker)
 
@@ -67,12 +131,59 @@ def calculate_investment_value(ticker, purchase_date, investment_amount):
     return current_value
 
 
-# Ex usage
-ticker = input("Enter stock ticker (AAPL): ")
-purchase_date = input("Enter the purchase date (YYYY-MM-DD): ")
-investment_amount = float(input("Enter the investment amount: "))
+def load_portfolio(filename):
+    """
+    Loads the portfolio from a JSON file.
 
-current_value = calculate_investment_value(
-    ticker, purchase_date, investment_amount)
+    Parameters:
+        filename (str): The file path of the portfolio JSON.
 
-print("Current value of the porfolio is: " + str(current_value))
+    Returns:
+        dict: The loaded portfolio data.
+    """
+    with open(filename, 'r') as f:
+        portfolio = json.load(f)
+    return portfolio
+
+
+def calculate_total_portfolio_value(portfolio):
+    """
+    Calculates the total current value of all stocks in the portfolio.
+
+    Parameters:
+        portfolio (dict): A dictionary containing the portfolio data.
+
+    Returns:
+        float: The total value of the portfolio.
+    """
+    total_value = 0
+    for stock in portfolio['stocks']:
+        ticker = stock['ticker']
+        purchase_date = stock['date']
+        investment_amount = stock['amount_in_dollars']
+
+        current_value = calculate_investment_value(
+            ticker, purchase_date, investment_amount)
+
+        if isinstance(current_value, str):
+            print(f"Error calculating value for {ticker}: {current_value}")
+        else:
+            total_value += current_value
+
+    return total_value
+
+
+# Load the portfolio JSON
+portfolio_file = 'portfolio.json'
+portfolio_data = load_portfolio(portfolio_file)
+
+# Calculate total portfolio value
+total_portfolio_value = calculate_total_portfolio_value(portfolio_data)
+# Calculate sharpe ratio
+#sharpe_ratio = fetch_portfolio_sharpe_ratio(portfolio_data)
+#print("Sharpe ratio of the portfolio is " + str(sharpe_ratio))
+
+stock_file = 'stock.json'
+stock_data = load_portfolio(stock_file)
+sharpe_ratio_stock = fetch_portfolio_sharpe_ratio(stock_data)
+print("Sharpe ratio of the portfolio is " + str(sharpe_ratio_stock))
