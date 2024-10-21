@@ -1,0 +1,19 @@
+{
+    "client_name": "P. Diddy",
+    "stocks": [
+        {
+            "name": "Apple",
+            "ticker": "AAPL",
+            "amount_in_dollars": 5000.00,
+            "date": "2010-10-13"
+            
+        },
+        {
+            "name": "IBM",
+            "ticker": "IBM",
+            "amount_in_dollars": 1000.00, 
+            "date": "2010-10-13"
+            
+        }
+    ]
+}
