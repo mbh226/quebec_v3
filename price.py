@@ -179,6 +179,7 @@ portfolio_data = load_portfolio(portfolio_file)
 
 # Calculate total portfolio value
 total_portfolio_value = calculate_total_portfolio_value(portfolio_data)
+print("Total value of the portfolio is: $" + str(total_portfolio_value))
 # Calculate sharpe ratio
 #sharpe_ratio = fetch_portfolio_sharpe_ratio(portfolio_data)
 #print("Sharpe ratio of the portfolio is " + str(sharpe_ratio))
