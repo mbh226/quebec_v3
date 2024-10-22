@@ -1,5 +1,7 @@
 ## How to contribute to Quebec
 
+The Quebec team follows the standard git workflow to manage this repository. Beginners will find the steps below helpful in making their first contributions.
+
 1. Clone Repository
 
 ```
@@ -32,7 +34,7 @@ git branch
 
 The branch your working on will be marked with an asterisk.
 
-6. Add a new file.
+6. Add a new file or make changes to an existing file using VSCode or preferred editor.
 
 7. Stage file for next commit.
 
