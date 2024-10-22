@@ -1,5 +1,7 @@
 ## How to contribute to Quebec
 
+#### Git Basics
+
 The Quebec team follows the standard git workflow to manage this repository. Beginners will find the steps detailed below helpful in making their first contributions.
 
 1. Clone Repository
