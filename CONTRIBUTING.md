@@ -52,3 +52,8 @@ git commit -m "Added new file and this is my descriptive message."
 ```
 git push origin <branch you created in step 4>
 ```
+
+#### SecDevOps Approach
+The Quebec team has agreed to take a SecDevOps approach to our project's development and all contributors are expected to do the same. SecDevOps is a software development approach that prioritizes security.[^1] All contributors must abide by Quebec's Secure Coding Standard.
+
+[^1]: https://www.pluralsight.com/blog/software-development/secdevops#:~:text=with%20Pluralsight%20Flow-,What%20is%20SecDevOps?,vulnerabilities%20they%20missed%20earlier%20on
