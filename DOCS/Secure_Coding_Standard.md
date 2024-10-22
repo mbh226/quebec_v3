@@ -63,13 +63,13 @@ This standard shall take effect upon publication. Compliance is expected with al
 
 If compliance with this standard is not feasible or technically possible, or if deviation from this policy is necessary to support a business function, entities shall request an exception through the Chief Information Security Officer’s exception process.
 
-# 6.0 Definitions of Key Terms
+# 5.0 Definitions of Key Terms
 
 | **Term** | Definition |
 | --- | --- |
 |     |     |
 
-# 8.0 Revision History
+# 6.0 Revision History
 
 This standard shall be subject to periodic review to ensure relevance.
 
@@ -77,7 +77,7 @@ This standard shall be subject to periodic review to ensure relevance.
 | --- | --- | --- |
 |     |     |     |
 
-# 9.0 Related Documents
+# 7.0 Related Documents
 
 [Open Web Application Security Project (OWASP) Top 10 Most Critical Application Security Risks (‘OWASP Top 10’)](https://www.owasp.org/index.php/Category:OWASP_Top_Ten_Project)
 
