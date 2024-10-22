@@ -1,7 +1,12 @@
-| <br><br>**Quebec Secure Coding Standard** | **Updated:** October 22, 2024 |
-| **Issued By:** Quebec Project Team <br><br>**Owner:** Molly Herforth |
-| <br><br>**This document was derived from the Center for Internet Security's Secure Coding Standard Template** [^1] |
-[^1]: https://www.cisecurity.org/wp-content/uploads/2020/06/Secure-Coding-Standard.docx
+**Quebec Secure Coding Standard**  
+**Updated:** October 22, 2024  
+
+**Issued By:** Quebec Project Team  
+**Owner:** Molly Herforth  
+
+**This document was derived from the Center for Internet Security's Secure Coding Standard Template**[^1]
+[^1]:https://www.cisecurity.org/wp-content/uploads/2020/06/Secure-Coding-Standard.docx
+
 
 # 1.0 Purpose and Benefits
 
