@@ -1,0 +1,10 @@
+[
+    {
+        "ticker": "AAPL", 
+        "nShares": 10
+    }, 
+    {
+        "ticker": "IBM",
+        "nShares": 20
+    }
+]
