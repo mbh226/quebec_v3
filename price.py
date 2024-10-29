@@ -1,9 +1,7 @@
 import yfinance as yf
-from datetime import datetime, timedelta, time, date
+from datetime import datetime, timedelta, date
 import json
 import pandas as pd
-import pytz
-import holidays
 
 def fetch_portfolio_sharpe_ratio(portfolio, risk_free_rate=0.03):
     """
@@ -114,11 +112,6 @@ def fetch_stock_price(ticker, Date):
     Returns:
         float: the Close value of the stock.
     """
-    openTime = time(hour = 9, minute = 30, second = 0)
-    # closeTime = time(hour = 16, minute = 0, second = 0)
-    tz = pytz.timezone('US/Eastern')
-    now = datetime.now(tz)
-    NYSE_holidays = holidays.NYSE()
     
     Date = datetime.fromisoformat(Date)
 
@@ -127,29 +120,15 @@ def fetch_stock_price(ticker, Date):
         print('Future data no available')
         return None
 
-    while (True):
-        # If it's a weekend
-        if (Date.weekday() > 4):
-            Date = Date - timedelta(days=Date.weekday() - 4)
-            continue
-        # If it's a holiday
-        if (Date.strftime('%Y-%m-%d') in NYSE_holidays):
-            Date = Date - timedelta(days=1)
-            continue
-        # If it's today but market is not open
-        if (Date.date() == date.today() and now.time() < openTime):
-            Date = Date - timedelta(days=1)
-            continue
-        break
+    while True:
+        stock_data = yf.download(ticker, start=Date, end=Date + timedelta(days=1), interval='1d', progress=False)
+        if not stock_data.empty:
+            stock_price = stock_data['Close'].iloc[0]
+            break
+        else:
+            Date -= timedelta(days=1)
 
-    start_date = Date
-    end_date = start_date + timedelta(days=1)
-    start_date = start_date.strftime('%Y-%m-%d')
-    end_date = end_date.strftime('%Y-%m-%d')
-
-    stock_data = yf.download(ticker, start=start_date, end=end_date, interval='1d', progress=False)
-
-    return stock_data['Close'].iloc[0]
+    return stock_price
 
 
 def calculate_total_portfolio_value(portfolio, Date=datetime.today().strftime('%Y-%m-%d')):
@@ -187,8 +166,8 @@ total_portfolio_value = calculate_total_portfolio_value(portfolio_data)
 print("Total value of the portfolio today is: $" + str(total_portfolio_value))
 
 # # Calculate total portfolio value on 2024-10-24
-# total_portfolio_value = calculate_total_portfolio_value(portfolio_data, '2024-10-24')
-# print("Total value of the portfolio on is 2024-10-24(Past) : $" + str(total_portfolio_value))
+# total_portfolio_value = calculate_total_portfolio_value(portfolio_data, '2024-05-01')
+# print("Total value of the portfolio on is 2024-05-01(Past) : $" + str(total_portfolio_value))
 
 # # Calculate total portfolio value on 2024-01-01
 # total_portfolio_value = calculate_total_portfolio_value(portfolio_data, '2024-01-01')
