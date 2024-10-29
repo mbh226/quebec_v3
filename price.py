@@ -23,19 +23,7 @@ def fetch_portfolio_sharpe_ratio(portfolio, risk_free_rate=0.03):
         portfolio_daily_returns = pd.DataFrame()
 
         # Calculate the total investment based on current prices and the number of shares
-        total_investment = 0
-        for stock in portfolio:
-            ticker = stock['ticker']
-            nShares = stock['nShares']
-
-            # Fetch the current price of the stock
-            try:
-                current_price_data = yf.download(ticker, period='1d', progress=False)
-                current_price = current_price_data['Close'].iloc[-1]
-                total_investment += current_price * nShares
-            except Exception as e:
-                print(f"Error fetching current price for {ticker}: {e}")
-                continue
+        total_investment = calculate_total_portfolio_value(portfolio)
 
         # Loop through each stock in the portfolio
         for stock in portfolio:
@@ -122,10 +110,13 @@ def fetch_stock_price(ticker, Date):
 
     while True:
         stock_data = yf.download(ticker, start=Date, end=Date + timedelta(days=1), interval='1d', progress=False)
+        # It's an open data
         if not stock_data.empty:
             stock_price = stock_data['Close'].iloc[0]
             break
+        # It's not an open date
         else:
+            # Fetch the data on the day before Date
             Date -= timedelta(days=1)
 
     return stock_price
