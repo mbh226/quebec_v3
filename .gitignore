@@ -1,0 +1,10 @@
+#macOS
+.DS_Store
+
+#Hypothesis files
+.hypothesis/
+
+#Python compiled files
+__pycache__/
+*.pyc
+
