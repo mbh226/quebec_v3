@@ -1,5 +1,5 @@
 import yfinance as yf
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import json
 import pandas as pd
 
@@ -8,7 +8,7 @@ def fetch_portfolio_sharpe_ratio(portfolio, risk_free_rate=0.03):
     Fetches the Sharpe Ratio for the entire portfolio based on historical prices.
 
     Parameters:
-        portfolio: The portfolio data loaded from JSON.
+        portfolio: A list of stock dictionaries with 'ticker' and 'nShares'.
         risk_free_rate (float): The risk-free rate for calculating the Sharpe Ratio (default is 3% annually).
 
     Returns:
@@ -22,13 +22,22 @@ def fetch_portfolio_sharpe_ratio(portfolio, risk_free_rate=0.03):
         # Create an empty DataFrame to hold daily portfolio returns
         portfolio_daily_returns = pd.DataFrame()
 
-        total_investment = sum(stock['amount_in_dollars'] for stock in portfolio['stocks'])
+        # Calculate the total investment based on current prices and the number of shares
+        total_investment = calculate_total_portfolio_value(portfolio)
 
         # Loop through each stock in the portfolio
-        for stock in portfolio['stocks']:
+        for stock in portfolio:
             ticker = stock['ticker']
-            investment_amount = stock['amount_in_dollars']
-            weight = investment_amount / total_investment  # Weight of the stock in the portfolio
+            nShares = stock['nShares']
+
+            # Calculate weight using today's price
+            try:
+                current_price_data = yf.download(ticker, period='1d', progress=False)
+                current_price = current_price_data['Close'].iloc[-1]
+                weight = (current_price * nShares) / total_investment  # Weight of the stock in the portfolio
+            except Exception as e:
+                print(f"Error fetching current price for {ticker}: {e}")
+                continue
 
             # Use yfinance to get the historical prices for the past year
             stock_data = yf.Ticker(ticker)
@@ -44,7 +53,7 @@ def fetch_portfolio_sharpe_ratio(portfolio, risk_free_rate=0.03):
                 portfolio_daily_returns[ticker] = daily_returns * weight
             else:
                 print(f"No historical data available for {ticker}")
-                return None
+                continue
 
         # Sum the weighted returns to get the total portfolio daily returns
         portfolio_daily_returns['Portfolio'] = portfolio_daily_returns.sum(axis=1)
@@ -65,72 +74,6 @@ def fetch_portfolio_sharpe_ratio(portfolio, risk_free_rate=0.03):
         print(f"Error fetching historical prices for portfolio: {e}")
         return None
 
-
-def get_historical_stock_price(ticker, purchase_date):
-    """
-    Fetches the closing stock price on the specified purchase date.
-
-    Parameters:
-        ticker (str): The stock ticker symbol.
-        purchase_date (str): The date of purchase in 'YYYY-MM-DD' format.
-
-    Returns:
-        float: The closing price on the purchase date, or None if no data is available.
-    """
-    stock = yf.Ticker(ticker)
-    purchase_date_dt = datetime.strptime(purchase_date, '%Y-%m-%d')
-
-    hist = stock.history(start=purchase_date_dt,
-                         end=purchase_date_dt + timedelta(days=1), interval="1d")
-
-    if not hist.empty:
-        price_at_purchase = hist['Close'].iloc[0]
-    else:
-        price_at_purchase = None
-
-    return price_at_purchase
-
-
-def get_current_stock_price(ticker):
-    """
-    Fetches the latest available closing stock price.
-
-    Parameters:
-        ticker (str): The stock ticker symbol.
-
-    Returns:
-        float: The most recent closing price of the stock.
-    """
-    stock = yf.Ticker(ticker)
-    current_price = stock.history(period="1d")['Close'].iloc[-1]
-    return current_price
-
-
-def calculate_investment_value(ticker, purchase_date, investment_amount):
-    """
-    Calculates the current value of an investment based on the historical stock price.
-
-    Parameters:
-        ticker (str): The stock ticker symbol.
-        purchase_date (str): The date of purchase in 'YYYY-MM-DD' format.
-        investment_amount (float): The amount of money initially invested.
-
-    Returns:
-        float or str: The current value of the investment, or an error message if no historical data is available.
-    """
-    initial_price = get_historical_stock_price(ticker, purchase_date)
-
-    if initial_price == None:
-        return "Invalid date or ticker"
-
-    current_price = get_current_stock_price(ticker)
-
-    shares_bought = investment_amount / initial_price
-    current_value = shares_bought * current_price
-
-    return current_value
-
-
 def load_portfolio(filename):
     """
     Loads the portfolio from a JSON file.
@@ -146,29 +89,60 @@ def load_portfolio(filename):
     return portfolio
 
 
-def calculate_total_portfolio_value(portfolio):
+def fetch_stock_price(ticker, Date):
     """
-    Calculates the total current value of all stocks in the portfolio.
+    Fetch the Close value of the stock on the specific day.
+
+    Parameters:
+        ticker (str): Stock ticker symbol.
+        Date (str): A date in 'YYYY-MM-DD' format.
+
+    Returns:
+        float: the Close value of the stock.
+    """
+    
+    Date = datetime.fromisoformat(Date)
+
+    # If date is in future
+    if (Date.date() > date.today()):
+        print('Future data no available')
+        return None
+
+    while True:
+        stock_data = yf.download(ticker, start=Date, end=Date + timedelta(days=1), interval='1d', progress=False)
+        # It's an open data
+        if not stock_data.empty:
+            stock_price = stock_data['Close'].iloc[0]
+            break
+        # It's not an open date
+        else:
+            # Fetch the data on the day before Date
+            Date -= timedelta(days=1)
+
+    return stock_price
+
+
+def calculate_total_portfolio_value(portfolio, Date=datetime.today().strftime('%Y-%m-%d')):
+    """
+    Calculates the total current value of all stocks in the portfolio on the specific day.
 
     Parameters:
         portfolio (dict): A dictionary containing the portfolio data.
+        Date (str): A date in 'YYYY-MM-DD' format. 
 
     Returns:
         float: The total value of the portfolio.
     """
     total_value = 0
-    for stock in portfolio['stocks']:
+    for stock in portfolio:
         ticker = stock['ticker']
-        purchase_date = stock['date']
-        investment_amount = stock['amount_in_dollars']
-
-        current_value = calculate_investment_value(
-            ticker, purchase_date, investment_amount)
-
-        if isinstance(current_value, str):
-            print(f"Error calculating value for {ticker}: {current_value}")
+        nShares = stock['nShares']
+        stock_price = fetch_stock_price(ticker, Date)
+        if stock_price:
+            total_value += nShares * stock_price
         else:
-            total_value += current_value
+            print('Error fetching prices for ' + ticker + ' on ' + Date)
+            return None
 
     return total_value
 
@@ -177,14 +151,27 @@ def calculate_total_portfolio_value(portfolio):
 portfolio_file = 'portfolio.json'
 portfolio_data = load_portfolio(portfolio_file)
 
-# Calculate total portfolio value
+# Test
+# Calculate total portfolio value on today
 total_portfolio_value = calculate_total_portfolio_value(portfolio_data)
-print("Total value of the portfolio is: $" + str(total_portfolio_value))
-# Calculate sharpe ratio
-#sharpe_ratio = fetch_portfolio_sharpe_ratio(portfolio_data)
-#print("Sharpe ratio of the portfolio is " + str(sharpe_ratio))
+print("Total value of the portfolio today is: $" + str(total_portfolio_value))
 
-stock_file = 'stock.json'
-stock_data = load_portfolio(stock_file)
-sharpe_ratio_stock = fetch_portfolio_sharpe_ratio(stock_data)
-print("Sharpe ratio of the portfolio is " + str(sharpe_ratio_stock))
+# # Calculate total portfolio value on 2024-10-24
+# total_portfolio_value = calculate_total_portfolio_value(portfolio_data, '2024-05-01')
+# print("Total value of the portfolio on is 2024-05-01(Past) : $" + str(total_portfolio_value))
+
+# # Calculate total portfolio value on 2024-01-01
+# total_portfolio_value = calculate_total_portfolio_value(portfolio_data, '2024-01-01')
+# print("Total value of the portfolio on is 2024-01-01(Holiday) : $" + str(total_portfolio_value))
+
+# # Calculate total portfolio value on 2024-10-27
+# total_portfolio_value = calculate_total_portfolio_value(portfolio_data, '2024-10-27')
+# print("Total value of the portfolio on is 2024-10-27(Weekend) : $" + str(total_portfolio_value))
+
+# # Calculate total portfolio value on 2025-10-27
+# total_portfolio_value = calculate_total_portfolio_value(portfolio_data, '2025-10-27')
+# print("Total value of the portfolio on is 2025-10-27(Future) : $" + str(total_portfolio_value))
+
+# Calculate sharpe ratio
+sharpe_ratio = fetch_portfolio_sharpe_ratio(portfolio_data)
+print("Sharpe ratio of the portfolio is: " + str(sharpe_ratio))
