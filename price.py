@@ -3,7 +3,8 @@ from datetime import datetime
 import json
 import pandas as pd
 
-def fetch_portfolio_sharpe_ratio(portfolio, price_data, risk_free_rate=0.03):
+
+def fetch_portfolio_sharpe_ratio(portfolio, price_data, total_investment, risk_free_rate=0.03):
     """
     Fetches the Sharpe Ratio for the entire portfolio based on historical prices.
 
@@ -34,9 +35,6 @@ def fetch_portfolio_sharpe_ratio(portfolio, price_data, risk_free_rate=0.03):
         # Create an empty DataFrame to hold daily portfolio returns
         portfolio_daily_returns = pd.DataFrame()
 
-        # Calculate the total investment based on current prices and the number of shares
-        total_investment = calculate_total_portfolio_value(portfolio, price_data)
-
         # Loop through each stock in the portfolio
         for stock in portfolio:
             ticker = stock['ticker']
@@ -45,7 +43,8 @@ def fetch_portfolio_sharpe_ratio(portfolio, price_data, risk_free_rate=0.03):
             # Calculate weight using today's price
             try:
                 current_price = price_data[ticker].iloc[-1]
-                weight = (current_price * nShares) / total_investment  # Weight of the stock in the portfolio
+                # Weight of the stock in the portfolio
+                weight = (current_price * nShares) / total_investment
             except Exception as e:
                 print(f"Error fetching current price for {ticker}: {e}")
                 continue
@@ -63,7 +62,8 @@ def fetch_portfolio_sharpe_ratio(portfolio, price_data, risk_free_rate=0.03):
                 continue
 
         # Sum the weighted returns to get the total portfolio daily returns
-        portfolio_daily_returns['Portfolio'] = portfolio_daily_returns.sum(axis=1)
+        portfolio_daily_returns['Portfolio'] = portfolio_daily_returns.sum(
+            axis=1)
 
         # Calculate the average daily return and standard deviation of portfolio returns
         average_daily_return = portfolio_daily_returns['Portfolio'].mean()
@@ -73,13 +73,15 @@ def fetch_portfolio_sharpe_ratio(portfolio, price_data, risk_free_rate=0.03):
         daily_risk_free_rate = risk_free_rate / 252  # 252 trading days in a year
 
         # Calculate the Sharpe Ratio for the portfolio
-        sharpe_ratio = (average_daily_return - daily_risk_free_rate) / stddev_daily_return
+        sharpe_ratio = (average_daily_return -
+                        daily_risk_free_rate) / stddev_daily_return
 
         return sharpe_ratio
 
     except Exception as e:
         print(f"Error fetching historical prices for portfolio: {e}")
         return None
+
 
 def load_portfolio(filename):
     """
@@ -133,9 +135,11 @@ price_data = yf.download(tickers, period='1y', progress=False)['Close']
 # test_data.to_json('test_data.json')
 
 # Calculate total portfolio value on today
-total_portfolio_value = calculate_total_portfolio_value(portfolio_data, price_data)
+total_portfolio_value = calculate_total_portfolio_value(
+    portfolio_data, price_data)
 print("Total value of the portfolio today is: " + str(total_portfolio_value))
 
 # Calculate sharpe ratio
-sharpe_ratio = fetch_portfolio_sharpe_ratio(portfolio_data, price_data)
+sharpe_ratio = fetch_portfolio_sharpe_ratio(
+    portfolio_data, price_data, total_portfolio_value)
 print("Sharpe ratio of the portfolio is: " + str(sharpe_ratio))
