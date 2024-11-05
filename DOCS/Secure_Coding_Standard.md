@@ -51,10 +51,43 @@ Qwiet AI recommends the following steps be taken for proper input validation: [^
 3. **Handle Invalid Input**: When data doesn’t pass validation, have a plan. You might log the issue, throw an exception, or ask the user to re-enter the data, but don’t just let it slide.
 4. **Secure Default Values**: Use safe default values to handle unexpected inputs. If something slips through the cracks, your application won’t suddenly behave unpredictably.
 5. **Regular Updates**: Keep your validation logic up-to-date. As new threats emerge, you must adjust your rules to stay one step ahead of attackers.
-    
+
+### 3.2 Static Analysis
+
+Static analysis techniques are used to evaluate a source code's formatting consistency, adherence to coding standards, documentation conventions, and security vulnerabilities **without** executing it. The Quebec development team has decided to implement static analysis testing early in the software development lifecycle to expedite the identification of security flaws within our code before they become problematic. Per Snyk.io, "static code analysis will enable us to detect code bugs or vulnerabilities that other testing methods and tools, such as manual code reviews and compilers, frequently miss." [^4] 
+
+Static Application Security Testing (SAST) is a subset of static analysis testing that our team has decided to focus on. SAST prioritizes the detection of security vulnerabilities as opposed to things like code style deviations and optimization issues. SAST tools are "designed specifically to find security issues with high accuracy, striving for low false positive and false negative rates, and providing detailed information about root causes and remedies of spotted vulnerabilities."[^5] The tool we've decided to use for SAST is [Bandit](https://bandit.readthedocs.io/en/latest/). Per their documentation, "Bandit is a tool designed to find common security issues in Python code. To do this, Bandit processes each file, builds an Abstract Syntax Tree (AST) from it, and runs appropriate plugins against the AST nodes. Once Bandit has finished scanning all the files, it generates a report."[^6]
+
+#### 3.2.1 Static Analysis Implmentation
+
+The Quebec team has incorporated Bandit into its Continuous Integration/Continuous Delivery (CI/CD) pipeline via GitHub Actions. In doing so, we've automated the static application analysis testing of our source code. Our repository's Bandit scan settings can be found and customized in the security.yml workflow located at .github/workflows/security.yml. Currently, the following events trigger a Bandit scan:
+
+- Changes pushed to the main branch
+- A pull request targeting the main brain is created or updated
+- A cron job that runs every Tuesday at 22:26 UTC regardless of any pushes or pull requests
+
+Alerts resulting from Bandit scans can be viewed under the Security tab the our repository, in the "Code scanning" section.
+
+Usage information for Bandit can be found [here](https://github.com/kgp33/quebec_v2/blob/main/DOCS/Bandit.md).
+
+### 3.3 Dyanmic Analysis
+
+Per the Software Engineering Body of Knowledge (SWEBOK), published by the IEEE Computer Society, "dynamic analysis techniques involve executing or simulating the software code, looking for errors and defects."[^7] Put simply, dyanmic analysis is used to evaluate an application's behavior **at runtime** when provided a variety of inputs to detect security vulnerabilities, logic flaws, performance issues, etc.
+
+[Hypothesis](https://hypothesis.works) is a tool that the Quebec team is using to implement dyanmic analysis testing into our software development lifecycle. Hypothesis integrates with [pytest](https://docs.pytest.org/en/stable/) and uses property-based testing to test our code against a much wider range of scenarios than a human tester could, finding edge cases that would have otherwise been missed.[^9] 
+
+#### 3.3.1 Dyanmic Analysis Implmentation
+
+The Quebec team is utilizing [Hypothesis](https://hypothesis.works), as well as [hypothesis_jsonschema](https://pypi.org/project/hypothesis-jsonschema/). The implementation details are being ironed out, but usage and setup information can be found [here](https://github.com/kgp33/quebec_v2/blob/main/DOCS/Hypothesis_Info%26Setup.md).
 
 [^2]: https://fintechpython.pages.oit.duke.edu/jupyternotebooks/1-Core%20Python/answers/rq-22-answers.html
 [^3]: https://qwiet.ai/securing-your-python-codebase-best-practices-for-developers/
+[^4]: https://snyk.io/learn/open-source-static-code-analysis/
+[^5]: https://snyk.io/learn/open-source-static-code-analysis/
+[^6]: https://bandit.readthedocs.io/en/latest/index.html
+[^7]: H. Washizaki, eds., Guide to the Software Engineering Body of Knowledge (SWEBOK Guide), Version 4.0, IEEE Computer Society, 2024; www.swebok.org
+[^8]: https://snyk.io/learn/application-security/sast-vs-dast/
+[^9]: https://hypothesis.works
 
 
 # 4.0 Compliance
