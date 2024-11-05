@@ -60,6 +60,7 @@ jobs:
       - name: Upload Safety results to Code Scanning Alerts
         if: success() # Only run if Safety scan succeeds
         run: |
+          safety check --json > safety_output.json
           # Convert Safety output to SARIF format (you would need a script for this)
           python convert_safety_to_sarif.py safety_output.json safety_output.sarif
           
