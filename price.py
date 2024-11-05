@@ -143,3 +143,20 @@ print("Total value of the portfolio today is: " + str(total_portfolio_value))
 sharpe_ratio = fetch_portfolio_sharpe_ratio(
     portfolio_data, price_data, total_portfolio_value)
 print("Sharpe ratio of the portfolio is: " + str(sharpe_ratio))
+
+
+
+
+
+#code to read in unit test data
+test_data = pd.read_json('test_data.json')
+
+# Calculate the unit test data total portfolio value on today
+total_test_portfolio_value = calculate_total_portfolio_value(
+    portfolio_data, test_data)
+print("Total value of the test portfolio today is: " + str(total_test_portfolio_value))
+
+# Calculate test data sharpe ratio
+test_sharpe_ratio = fetch_portfolio_sharpe_ratio(
+    portfolio_data, test_data, total_test_portfolio_value)
+print("Sharpe ratio of the test portfolio is: " + str(test_sharpe_ratio))
