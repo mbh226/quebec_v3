@@ -50,6 +50,12 @@ jobs:
           # path to a .bandit file that supplies command line arguments
           # ini_path: # optional, default is DEFAULT
 
+      #install safety
+      - name: Install Safety
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install safety
+
       #creating output directory to store safety scans
       - name: Create output directory
         run: |
