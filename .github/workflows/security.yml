@@ -50,6 +50,11 @@ jobs:
           # path to a .bandit file that supplies command line arguments
           # ini_path: # optional, default is DEFAULT
 
+      #creating output directory to store safety scans
+      - name: Create output directory
+        run: |
+          mkdir -p ./scan-results
+
       # Run SafetyCLI Scan (Check for known vulnerabilities in dependencies)
       - uses: pyupio/safety-action@v1
         name: Safety Scan
@@ -62,10 +67,10 @@ jobs:
         run: |
           safety check --json > safety_output.json
           # Convert Safety output to SARIF format (you would need a script for this)
-          python scripts/convert_safety_to_sarif.py safety_output.json safety_output.sarif
+          python scripts/convert_safety_to_sarif.py safety_output.json ./scan-results/safety_output.sarif
           
           # Upload the SARIF results
           uses: github/codeql-action/upload-sarif@v2
           with:
-            sarif_file: safety_output.sarif
+            sarif_file: ./scan-results/safety_output.sarif
 
