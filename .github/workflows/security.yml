@@ -50,6 +50,11 @@ jobs:
         run: |
           safety scan --debug --json --ouput ./scan-results/safety_output.json || echo "Safety scan failed"
 
+      # Check the contents of the directory to verify the file is created
+      - name: Verify the scan-results directory
+        run: |
+          ls -la ./scan-results
+
       # Convert and Upload Safety results to SARIF
       - name: Convert and Upload Safety results to SARIF
         if: success() # Ensure this step runs only if the previous steps succeed
