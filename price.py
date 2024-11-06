@@ -140,13 +140,13 @@ def load_and_validate_portfolio():
         return None
 
 # Load, validate, and calculate total portfolio value
-validated_portfolio = load_and_validate_portfolio()
+validated_portfolio = load_and_validate_portfolio()['stocks']
 portfolio_data = validated_portfolio
 
 if validated_portfolio:
     # Extract tickers from the validated portfolio
     #tickers = [stock['ticker'] for stock in portfolio_data]
-    tickers = [stock['ticker'] for stock in validate_portfolio]
+    tickers = [stock['ticker'] for stock in validated_portfolio]
     
     # Fetch historical price data for the tickers
     price_data = yf.download(tickers, period='1y', progress=False)['Close']
