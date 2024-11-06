@@ -59,7 +59,9 @@ jobs:
       - uses: pyupio/safety-action@v1
         name: Safety Scan
         with:
-          api-key: ${{ secrets.SAFETY_API_KEY }}
+          #harcoding for testing purposes until Karim and I can figure out secrets
+          api-key: 2ecceb26-6325-44b8-9597-8c2b18493a6d
+          #api-key: ${{ secrets.SAFETY_API_KEY }}
 
       # Convert Safety results to SARIF and upload (if using a script or another tool)
       - name: Upload Safety results to Code Scanning Alerts
