@@ -153,7 +153,7 @@ test_data = pd.read_json('test_data.json')
 
 # Calculate the unit test data total portfolio value on today
 total_test_portfolio_value = calculate_total_portfolio_value(
-    portfolio_data, test_data)
+    portfolio_data, test_data, '2024-11-04')
 print("Total value of the test portfolio today is: " + str(total_test_portfolio_value))
 
 # Calculate test data sharpe ratio
