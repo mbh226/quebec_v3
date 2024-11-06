@@ -49,7 +49,7 @@ jobs:
       # Save Safety output to file
       - name: Save Safety output to JSON file
         run: |
-          safety scan --debug --json --api-key 2ecceb26-6325-44b8-9597-8c2b18493a6d --ouput json ./scan-results/safety_output.json || echo "Safety scan failed"
+          safety scan --debug --json --api-key ${{ secrets.SAFETY_API_KEY }} --ouput json > ./scan-results/safety_output.json || echo "Safety scan failed"
 
       # Check the contents of the directory to verify the file is created
       - name: Verify the scan-results directory
