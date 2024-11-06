@@ -60,6 +60,8 @@ jobs:
       - name: Create output directory
         run: |
           mkdir -p ./scan-results
+          #make it writable
+          chmod -R 755 ./scan-results  # Set permissions to be writable
 
       #run SafetyCLI Scan
       - uses: pyupio/safety-action@v1
