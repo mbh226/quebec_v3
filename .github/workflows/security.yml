@@ -13,10 +13,10 @@
 name: Security Scanning
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "secure_coding_updates" ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "main" ]
+    branches: [ "main", "secure_coding_updates" ]
   schedule:
     - cron: '26 22 * * 2'
 
