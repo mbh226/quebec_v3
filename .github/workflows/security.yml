@@ -62,7 +62,7 @@ jobs:
         run: |
           safety check --json > safety_output.json
           # Convert Safety output to SARIF format (you would need a script for this)
-          python convert_safety_to_sarif.py safety_output.json safety_output.sarif
+          python scripts/convert_safety_to_sarif.py safety_output.json safety_output.sarif
           
           # Upload the SARIF results
           uses: github/codeql-action/upload-sarif@v2
