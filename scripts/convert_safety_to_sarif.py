@@ -15,6 +15,9 @@ def convert_safety_to_sarif(safety_json, sarif_file):
         print(f"Error: Failed to decode JSON from {safety_json}.")
         sys.exit(1)
     
+    #just want to see the json data
+    print("Safety JSON structure:", safety_data)
+
     #setting up the data structure to hold the results of the safety scan
     sarif_data = {
         "version": "2.1.0",
@@ -31,6 +34,13 @@ def convert_safety_to_sarif(safety_json, sarif_file):
         ]
     }
 
+    #checking to see if vulnerabilities exists in the safety data
+    issues = safety_data.get('vulnerabilities', safety_data.get('issues', []))
+
+    if not issues:
+        print("No issues found in the Safety JSON. Exiting.")
+        sys.exit(1)
+
     for issue in safety_data.get('vulnerabilities', []):
         #want to handle issues with data appropriately
         #mark rule_id as 'UNKNOWN' if vuln_id is missing
@@ -39,8 +49,11 @@ def convert_safety_to_sarif(safety_json, sarif_file):
         package_name = issue.get('package_name', 'Unknown package')
         #default to 'LOW' if no severity is provided
         severity = issue.get('severity', 'LOW').upper()
+
+        #placeholder for line number if available in the issue data
+        start_line = issue.get('line', 1)
     
-    #converting the results of safety scan to sarif format
+        #converting the results of safety scan to sarif format
         sarif_data['runs'][0]['results'].append({
             "ruleId": rule_id,
             "message": {
@@ -53,7 +66,7 @@ def convert_safety_to_sarif(safety_json, sarif_file):
                             "uri": package_name
                         },
                         "region": {
-                            "startLine": 1  # Placeholder for line number
+                            "startLine": start_line
                         }
                     }
                 }
