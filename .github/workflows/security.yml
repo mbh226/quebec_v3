@@ -48,7 +48,7 @@ jobs:
       # Save Safety output to file
       - name: Save Safety output to JSON file
         run: |
-          safety check --json > ./scan-results/safety_output.json
+          safety scan --json > ./scan-results/safety_output.json
 
       # Convert and Upload Safety results to SARIF
       - name: Convert and Upload Safety results to SARIF
